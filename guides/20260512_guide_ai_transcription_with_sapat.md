@@ -3,7 +3,7 @@ title: 'AI Transcription with Sapat in Daytona'
 description:
   'Set up Sapat in a Daytona workspace and transcribe audio with OpenAI, Groq, or Azure OpenAI Whisper APIs.'
 date: 2026-05-12
-author: 'AI Agent'
+author: 'adminlip'
 tags: ['ai', 'transcription', 'daytona', 'sapat', 'openai', 'groq']
 ---
 
@@ -34,7 +34,7 @@ OpenAI, Groq, and Azure OpenAI, and verify the generated transcript files.
 - Clone Sapat into a Daytona workspace.
 - Install Python dependencies and make sure `ffmpeg` is available.
 - Add one or more provider credentials to `.env`.
-- Run `python -m src.sapat.script <file> --api openai|groq|azure`.
+- Run `sapat <file> --api openai|groq|azure`.
 - Use `--language`, `--prompt`, `--temperature`, `--quality`, and `--correct` to
   tune the transcript.
 
@@ -64,11 +64,17 @@ git clone https://github.com/nkkko/sapat.git
 cd sapat
 ```
 
-Install the Python packages listed by the project:
+Install Sapat in editable mode so the `sapat` command is available inside the
+workspace:
 
 ```bash
-python -m pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
 ```
+
+You can confirm the CLI is available with `sapat --help`.
 
 Sapat relies on `ffmpeg` for media conversion. Check whether it is already
 available:
@@ -153,24 +159,25 @@ your Azure OpenAI resource. It is not always the same as the model name.
 ## Step 3: Run Your First Transcription
 
 Sapat's CLI accepts a file or a directory as the input path. It requires an API
-choice with `--api`, and it defaults to English with `--language en`.
+choice with `--api`, and it defaults to English with `--language en`. The
+installed entry point is `sapat`, as defined by the project package metadata.
 
 Run an OpenAI transcription:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 --api openai --language en
+sapat samples/demo-recording.mp4 --api openai --language en
 ```
 
 Run the same file with Groq:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 --api groq --language en
+sapat samples/demo-recording.mp4 --api groq --language en
 ```
 
 Run it with Azure OpenAI:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 --api azure --language en
+sapat samples/demo-recording.mp4 --api azure --language en
 ```
 
 The command first converts the media file to MP3, then sends the audio to the
@@ -182,7 +189,7 @@ If you have a folder of recordings, pass the folder path instead of a single
 file:
 
 ```bash
-python -m src.sapat.script samples --api groq --language en
+sapat samples --api groq --language en
 ```
 
 That pattern is useful for processing a batch of customer interviews or a set of
@@ -199,7 +206,7 @@ If you know the language, set it explicitly. That reduces ambiguity and can make
 transcription faster:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 --api openai --language de
+sapat samples/demo-recording.mp4 --api openai --language de
 ```
 
 ### Add a Prompt
@@ -208,7 +215,7 @@ Use `--prompt` when the recording contains names, product terms, acronyms, or
 technical vocabulary:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 \
+sapat samples/demo-recording.mp4 \
   --api openai \
   --language en \
   --prompt "Daytona workspaces, dev containers, Sapat, Whisper, Groq Cloud"
@@ -223,7 +230,7 @@ Sapat defaults to `--temperature 0.3`. Lower values are better for deterministic
 technical transcripts:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 \
+sapat samples/demo-recording.mp4 \
   --api groq \
   --language en \
   --temperature 0.1
@@ -231,15 +238,15 @@ python -m src.sapat.script samples/demo-recording.mp4 \
 
 ### Choose Conversion Quality
 
-The `--quality` option controls the MP3 conversion quality. Sapat accepts `L`,
-`M`, and `H`, with `M` as the default:
+The `--quality` option controls the MP3 conversion quality. Sapat accepts `l`,
+`m`, and `h`, with `m` as the default:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 --api openai --quality H
+sapat samples/demo-recording.mp4 --api openai --quality h
 ```
 
-Use `H` for recordings with background noise or multiple speakers. Use `M` for
-most normal demos and meetings. Use `L` only when file size matters more than
+Use `h` for recordings with background noise or multiple speakers. Use `m` for
+most normal demos and meetings. Use `l` only when file size matters more than
 accuracy.
 
 ### Correct the Transcript with a Chat Model
@@ -248,7 +255,7 @@ Pass `--correct` when you configured the provider's chat model variable and want
 Sapat to clean up spelling, punctuation, and product names:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 \
+sapat samples/demo-recording.mp4 \
   --api openai \
   --language en \
   --prompt "Daytona, Sapat, OpenAI Whisper, Groq Cloud" \
@@ -280,8 +287,8 @@ For important material, run the same file through two providers and compare the
 results:
 
 ```bash
-python -m src.sapat.script samples/demo-recording.mp4 --api openai --language en
-python -m src.sapat.script samples/demo-recording.mp4 --api groq --language en
+sapat samples/demo-recording.mp4 --api openai --language en
+sapat samples/demo-recording.mp4 --api groq --language en
 ```
 
 OpenAI may be the safer default, Groq may be faster for iteration, and Azure may
@@ -315,8 +322,16 @@ then rerun the command. For publishable output, also try `--correct`.
 
 **Problem:** Large media files fail or time out.
 
-**Solution:** Split long recordings into smaller files, use `--quality M` or
-`--quality L` during testing, and process a directory in batches.
+**Solution:** Split long recordings into smaller files, use `--quality m` or
+`--quality l` during testing, and process a directory in batches.
+
+## References
+
+- [Sapat GitHub repository](https://github.com/nkkko/sapat)
+- [OpenAI audio transcription API](https://platform.openai.com/docs/guides/speech-to-text)
+- [Groq speech-to-text documentation](https://console.groq.com/docs/speech-to-text)
+- [Azure OpenAI Whisper model documentation](https://learn.microsoft.com/azure/ai-services/openai/concepts/models#whisper-models)
+- [Daytona workspaces documentation](https://www.daytona.io/docs)
 
 ## Conclusion
 
