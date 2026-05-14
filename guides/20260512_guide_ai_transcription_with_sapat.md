@@ -76,6 +76,11 @@ python -m pip install -e .
 
 You can confirm the CLI is available with `sapat --help`.
 
+Because the package exposes the CLI through the `sapat = "sapat.script:main"`
+entry point, installing it in the virtual environment is enough. You do not need
+to copy scripts into `/usr/local/bin`, and you can keep the tool isolated from
+other Python projects in the same workspace.
+
 Sapat relies on `ffmpeg` for media conversion. Check whether it is already
 available:
 
@@ -101,6 +106,10 @@ cp /path/to/demo-recording.mp4 samples/demo-recording.mp4
 ## Step 2: Configure Provider Credentials
 
 Sapat loads environment variables from a `.env` file in the project directory.
+Keep that file out of Git and use Daytona workspace secrets or your team's normal
+secret manager for real keys. The examples below show the variable names, not
+values that should be committed.
+
 Copy the example file first:
 
 ```bash
@@ -274,7 +283,7 @@ ls -lah samples
 sed -n '1,80p' samples/demo-recording.txt
 ```
 
-Check three things before you trust the result:
+Check these things before you trust the result:
 
 1. **Completeness:** the transcript should cover the whole recording, not only
    the first segment.
@@ -282,6 +291,11 @@ Check three things before you trust the result:
    correctly.
 3. **Speaker context:** if the recording includes multiple people, review
    sections where interruptions or crosstalk occur.
+4. **File size:** OpenAI and Groq paths validate converted audio before upload,
+   so very large recordings should be split before you spend time debugging API
+   responses.
+5. **Repeatability:** rerun the same command from a clean terminal to make sure
+   the result depends on `.env` and the input file, not on temporary shell state.
 
 For important material, run the same file through two providers and compare the
 results:
