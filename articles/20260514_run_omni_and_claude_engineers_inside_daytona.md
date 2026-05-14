@@ -89,6 +89,17 @@ Use a small first prompt to verify the agent can read the workspace and respond.
 summarize the repository structure or explain where dependencies are defined. A simple verification prompt
 avoids changing files before you know the environment is working.
 
+After that, try a contained coding task on a throwaway branch. For example, you can ask Omni Engineer:
+
+```text
+Inspect this repository and add a short README section that explains the main runtime dependencies. Keep the
+change in Markdown only and show me the diff before writing any files.
+```
+
+That prompt checks three important things in Daytona: the agent can read the mounted repository, it can reason
+about the installed Python dependencies, and you can review the proposed diff inside the workspace before
+committing anything.
+
 ## Start Claude Engineer in a Daytona Workspace
 
 Create another Daytona workspace from the Claude Engineer repository:
@@ -119,6 +130,16 @@ python app.py
 Claude Engineer also includes command-line entry points and alternative scripts in the repository. If you want
 the CLI experience instead of the web interface, inspect the repository README in your Daytona workspace and
 run the script that matches the mode you want to test.
+
+For a first Claude Engineer task, keep the scope small and reversible. For example:
+
+```text
+Review the project structure and suggest one low-risk improvement to the setup documentation. Do not edit
+files yet; explain the exact file and lines you would change.
+```
+
+This lets you confirm the Anthropic key is loaded, the application can access the repository, and the agent is
+returning reviewable suggestions before you ask it to modify code.
 
 ## Keep Secrets and Workspace State Clean
 
